@@ -4,6 +4,8 @@ import csv
 import os
 import pdb
 
+pd.options.mode.chained_assignment = None
+
 train_address = 'C:\Users\\anike\Documents\Code\Titanic\Titanic Data\\train.csv'
 train = pd.read_csv(train_address)
 test_address = 'C:\Users\\anike\Documents\Code\Titanic\Titanic Data\\test.csv'
@@ -13,6 +15,21 @@ result_address = 'C:\Users\\anike\Documents\Code\Titanic\Titanic Data\Results\\r
 # Percentage survivals:
 print 'Male: \n', train['Survived'][train['Sex'] == 'male'].value_counts(normalize = True)
 print 'Female: \n', train['Survived'][train['Sex'] == 'female'].value_counts(normalize = True)
+
+# Cross-validation
+cv_len = 2 * len(train['Survived']) / 3
+target_train = train['Survived'][:cv_len]
+target_cv = train['Survived'][cv_len:]
+train['Predicted'] = 0
+train['Predicted'][train['Sex'] == 'female'] = 1
+predicted_train = train['Predicted'][:cv_len]
+predicted_cv = train['Predicted'][cv_len:]
+
+train_acc = 100 - np.sum(np.absolute(predicted_train - target_train)) * 100.0 / cv_len
+cv_acc = 100 - np.sum(np.absolute(predicted_cv - target_cv)) * 100.0 / (len(train['Survived']) - cv_len)
+
+print('Training Accuracy: {:{width}.{prec}f}%'.format(train_acc, width = 5, prec = 2))
+print('Test Accuracy (CV): {:{width}.{prec}f}%'.format(cv_acc, width = 5, prec = 2))
 
 # Predict based on gender:
 test_gender = test
